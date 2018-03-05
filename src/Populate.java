@@ -4,6 +4,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.json.*;
 
@@ -18,20 +22,34 @@ import org.json.*;
  */
 public class Populate {
 	
-	//Holds a string of the a file value.
-	private String fileString;
-	
     public static void main( String[] args ) throws IOException, JSONException {
-    	
-        Populate populate = new Populate();
-        System.out.println("Starting populate.java");
+        Populate populate = new Populate(args);
+    }
+    
+    /**
+     * Constructor
+     * @param arg
+     * @throws JSONException 
+     * @throws IOException 
+     */
+    public Populate(String[] args) throws IOException, JSONException {
+    	Connection connection = null;
+    	try {
+			connection = OpenConnection();
+			System.out.println("Starting populate.java");
+	        
+	        for(String fileName: args) {
+	        	System.out.println("JSON File: " + fileName);
+	        	ReadFile(fileName,connection);
+	        } 
+	        System.out.println("Finished populating tables");
+	        
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} 
         
-        for(String fileName: args) {
-        	//System.out.println(fileName);
-        	populate.ReadFile(fileName);
-        }
-        
-        System.out.println("Finished populating tables");
         System.exit( 0 ); //success
     }
     
@@ -40,14 +58,11 @@ public class Populate {
      * @param path
      * @throws IOException
      * @throws JSONException 
+     * @throws SQLException 
      */
-    public void ReadFile(String path) throws IOException, JSONException {
+    public void ReadFile(String path,Connection con) throws IOException, JSONException, SQLException {
 		try {
-			
-			//InputStream stream = new FileInputStream(path);
-			//JSONParser parser = new JSONParser();
-			//parser.parse(stream);
-			
+			//Streaming the JSON file and saving the data into StringBuilder
 			BufferedReader br = new BufferedReader(new FileReader(path));
 			StringBuilder sb = new StringBuilder();
 			
@@ -58,18 +73,27 @@ public class Populate {
 			        line = br.readLine();
 			}
 			
-	        //System.out.println(sb);
+			// Yelp User JSON File
+			if (path.contains("yelp_user")) {
+				String[] arr = sb.toString().split("(?=\\{\"yelping_since\")");
+				Statement stmt = null;
+				for (int i = 0; i < 100; i++) {
+					JSONObject object = new JSONObject(arr[i]);
+					
+					//Prepare Statement
+					String yelpID = object.getString("user_id");
+					String createString = 
+							"INSERT INTO YelpUser (userID) VALUES  " +
+							"('"+yelpID +"')";
+					
+					stmt= con.createStatement(); //Creates SQL Statement
+					stmt.executeUpdate(createString);
+				}
+			}
+			else 
+			
 			System.out.println(sb.length());
-	        String[] arr = sb.toString().split("(?=\\{\"yelping_since\")");
-	        System.out.println(arr.length);
-
-	        for(int i = 0; i < 1 ; i++) {
-	        	//System.out.println("Kevin");
-	        	System.out.print(arr[0]);
-		        JSONObject object = new JSONObject(arr[i]);
-				System.out.println(object.getString("name"));
-	        }
-	        
+	      
 		    br.close();
 		    
 		} catch (FileNotFoundException e) {
@@ -81,12 +105,55 @@ public class Populate {
 		}
 		
 	}
-	
+    
 	/**
-	 * Method returns fileString
+	 * Method attempts to connect to the database given the input provided by the user.
 	 * @return
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
 	 */
-	public String GetFileString() {
-		return fileString;
+	private Connection OpenConnection() throws SQLException, ClassNotFoundException{
+		
+		// Load the Oracle database driver \
+		DriverManager.registerDriver(new oracle.jdbc.OracleDriver()); 
+		
+		String host = "localhost"; 
+		String port = "1521"; 
+		String dbName = "kevin"; 
+		String userName = "Scott"; 
+		String password = "Tiger123";
+		
+//		//Scanner input
+//		Scanner reader = new Scanner(System.in);
+//		System.out.print("Enter the host name: ");
+//		host = reader.next();
+//		System.out.print("Enter the port name: ");
+//		port = reader.next();
+//		System.out.print("Enter the dbName name: ");
+//		dbName = reader.next();
+//		System.out.print("Enter the userName name: ");
+//		userName = reader.next();
+//		System.out.print("Enter the password name: ");
+//		password = reader.next();
+//		reader.close();
+		
+		// Construct the JDBC URL 
+		String dbURL = "jdbc:oracle:thin:@" + host + ":" + port + ":" + dbName; 
+		return DriverManager.getConnection(dbURL, userName, password); 
 	}
+	
+	/** 
+	 * Close the database connection 
+	 * @param con 
+	 */ 
+	private void CloseConnection(Connection con) { 
+
+		try { 
+			con.close(); 
+		} catch (SQLException e) { 
+			System.err.println("Cannot close connection: " + e.getMessage()); 
+		} 
+	}
+	
+	
 }

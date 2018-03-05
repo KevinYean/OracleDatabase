@@ -12,9 +12,9 @@ import java.util.Scanner;
  */
 public class Start {
 
-	/*public static void main(String[] args) {
+	public static void main(String[] args) {
 		Start start = new Start();
-	}*/
+	}
 
 	/**
 	 * Constructor which immediately begins the program as soon as it runs.
@@ -27,7 +27,7 @@ public class Start {
 			//Create Tables
 			CreateTables(connection);
 			//Drop Tables
-			DropTables(connection);
+			//DropTables(connection);
 		} catch (SQLException e) { 
 			System.err.println("Errors occurs when communicating with the database server: " + e.getMessage()); 
 		} catch (ClassNotFoundException e) { 
