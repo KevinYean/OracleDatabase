@@ -1,8 +1,12 @@
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+
 import org.json.*;
+
 
 /**
  * 
@@ -21,11 +25,9 @@ public class Populate {
     	
         Populate populate = new Populate();
         System.out.println("Starting populate.java");
-        	
-        populate.ReadFile(".//src/yelp_user.json");
         
         for(String fileName: args) {
-        	System.out.println(fileName);
+        	//System.out.println(fileName);
         	populate.ReadFile(fileName);
         }
         
@@ -41,16 +43,35 @@ public class Populate {
      */
     public void ReadFile(String path) throws IOException, JSONException {
 		try {
+			
+			//InputStream stream = new FileInputStream(path);
+			//JSONParser parser = new JSONParser();
+			//parser.parse(stream);
+			
 			BufferedReader br = new BufferedReader(new FileReader(path));
 			StringBuilder sb = new StringBuilder();
-
-			//Sample
-			String str = "{\"user_id\": \"qtrmBGNqCvupHMHL_bKFgQ\"}";
-			JSONObject obj = new JSONObject(str);
-			String n = obj.getString("user_id");
-			System.out.println(n + " ");  // prints "Alice 20"
 			
+			String line = br.readLine();
+			while (line != null) {
+			        sb.append(line);
+			        sb.append(System.lineSeparator());
+			        line = br.readLine();
+			}
+			
+	        //System.out.println(sb);
+			System.out.println(sb.length());
+	        String[] arr = sb.toString().split("(?=\\{\"yelping_since\")");
+	        System.out.println(arr.length);
+
+	        for(int i = 0; i < 1 ; i++) {
+	        	//System.out.println("Kevin");
+	        	System.out.print(arr[0]);
+		        JSONObject object = new JSONObject(arr[i]);
+				System.out.println(object.getString("name"));
+	        }
+	        
 		    br.close();
+		    
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
