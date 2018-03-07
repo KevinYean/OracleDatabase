@@ -4,6 +4,7 @@ CREATE TABLE YelpUser(
 			name CHAR(40),
 			userID CHAR(30),
 			fans INT,
+			friendCount INT,
 			averageStars FLOAT,
 			userType CHAR(10),
 			compliments CHAR(50),
