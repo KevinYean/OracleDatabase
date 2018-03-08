@@ -1,1 +1,1 @@
-SELECT * FROM YelpUser WHERE name = all
+SELECT COUNT(*) from YelpUser

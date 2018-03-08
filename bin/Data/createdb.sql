@@ -1,56 +1,34 @@
 CREATE TABLE YelpUser(
 			yelpingSince DATE,
 			reviewsCount INT,
-			name CHAR(40),
+			name VARCHAR(40),
 			userID CHAR(30),
-			fans INT,
 			friendCount INT,
 			averageStars FLOAT,
-			userType CHAR(10),
-			compliments CHAR(50),
-			elite CHAR(20),
 			PRIMARY KEY (userID));
 			
-CREATE TABLE UserVote(
-			userID CHAR(30),
-			vote CHAR(10),
-			voteCount INT,
-			FOREIGN KEY (userID) REFERENCES YelpUser ON DELETE CASCADE);
-
-CREATE TABLE Friend(
-			userID CHAR(30),
-			friendID CHAR(30),
-			FOREIGN KEY (userID) REFERENCES YelpUser ON DELETE CASCADE,
-			FOREIGN KEY (friendID) REFERENCES YelpUser ON DELETE CASCADE);
-
 CREATE TABLE BusinessCategory(
-			categoryName CHAR(30),
+			categoryName VARCHAR(30),
 			PRIMARY KEY (categoryName));    
+			
+CREATE TABLE SubCategory(
+			subName VARCHAR(40),
+			mainCategory VARCHAR(30),
+			FOREIGN KEY (mainCategory) references BusinessCategory ON DELETE CASCADE);
+			
 
 CREATE TABLE Business(
 			businessID CHAR(30),
-			open CHAR(5),
-			city CHAR (20),
-			state CHAR (20),
-			latitude CHAR(20),
-			longitude CHAR(20),
+			city VARCHAR (50),
+			state VARCHAR(20),
 			reviewsCount INT,
-			name CHAR(30),
-			neighborhoods CHAR(30),
+			name VARCHAR(100),
 			stars FLOAT,
-			attributes CHAR(20),
 			PRIMARY KEY (businessID));
-			
-CREATE TABLE BusinessHours(
-			businessID CHAR(30),
-			day CHAR(10),
-			OpenTime DATE,
-			CloseTime DATE,
-			FOREIGN KEY (businessID) REFERENCES Business);
 			
 CREATE TABLE BusinessWithCategory(
 			businessID CHAR(30),
-			categoryName CHAR(30),
+			categoryName VARCHAR(30),
 			FOREIGN KEY (businessID) REFERENCES Business ON DELETE CASCADE,
 			FOREIGN KEY (categoryName) REFERENCES BusinessCategory ON DELETE CASCADE);
 		
@@ -66,18 +44,12 @@ CREATE TABLE Reviews(
 			userID CHAR(30),
 			reviewsID CHAR(30),
 			stars FLOAT,
-			text CHAR(1000),
-			type CHAR(10),
+			voteCount INT,
+			reviewDate DATE,
 			businessID CHAR(30),
 			PRIMARY KEY (reviewsID),
-			FOREIGN KEY(userID) REFERENCES YelpUser,
-			FOREIGN KEY(businessID) REFERENCES Business);
-			
-CREATE TABLE ReviewsVote(
-			reviewsID CHAR(30),
-			vote CHAR(10),
-			voteCount INT,
-			FOREIGN KEY (reviewsID) REFERENCES Reviews ON DELETE CASCADE);
+			FOREIGN KEY(userID) REFERENCES YelpUser ON DELETE CASCADE,
+			FOREIGN KEY(businessID) REFERENCES Business ON DELETE CASCADE);
 			
 INSERT INTO BusinessCategory VALUES ('Active Life');
 INSERT INTO BusinessCategory VALUES ('Arts & Entertainment');
