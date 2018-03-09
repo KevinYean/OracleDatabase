@@ -28,9 +28,8 @@ CREATE TABLE Business(
 			
 CREATE TABLE BusinessWithCategory(
 			businessID CHAR(30),
-			categoryName VARCHAR(30),
-			FOREIGN KEY (businessID) REFERENCES Business ON DELETE CASCADE,
-			FOREIGN KEY (categoryName) REFERENCES BusinessCategory ON DELETE CASCADE);
+			categoryName VARCHAR(40),
+			FOREIGN KEY (businessID) REFERENCES Business ON DELETE CASCADE;
 		
 CREATE TABLE Checkin(
 			checkinType CHAR(20),

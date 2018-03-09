@@ -1,1 +1,3 @@
-SELECT COUNT(*) from YelpUser
+SELECT subName
+FROM SUBCATEGORY 
+WHERE mainCategory = 'Drugstores'

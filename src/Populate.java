@@ -127,6 +127,12 @@ public class Populate {
 			createString = "DELETE FROM BusinessWithCategory";
 			stmt = connection.createStatement(); // Creates SQL Statement
 			stmt.executeUpdate(createString);
+			
+			System.out.println("Dropping all values in SubCategory");
+			// Prepare Statement to DROP ALL VALUES From Yelp User.
+			createString = "DELETE FROM SubCategory";
+			stmt = connection.createStatement(); // Creates SQL Statement
+			stmt.executeUpdate(createString);
 		}
 
 		else if (path.contains("checkin")) {
@@ -268,6 +274,12 @@ public class Populate {
 					}
 					stmt.close();
 				}
+				
+				PreparedStatement psBusinessWithCategory =
+						connection.prepareStatement(
+								"Insert INTO " 
+						+ "BusinessWithCategory(businessID,categoryName) " 
+						+ "VALUES (?,?)");
 
 				for (int i = 0; i < arr.length; i++) {
 					// Batch Attempt
@@ -278,13 +290,16 @@ public class Populate {
 					String name = object.getString("name");
 					float stars = (float) object.getDouble("stars");
 
+					psBusinessWithCategory.setString(1, businessID);
+					
 					// Handling subcategories
 					JSONArray arrCat = object.getJSONArray("categories");
 					ArrayList<String> temp = new ArrayList<String>();
-
 					{
 						for (int x = 0; x < arrCat.length(); x++) {
 							temp.add(arrCat.getString(x));
+							psBusinessWithCategory.setString(2, arrCat.getString(x));
+							psBusinessWithCategory.addBatch();
 						}
 
 						for (int t = 0; t < categories.size(); t++) {
@@ -306,6 +321,7 @@ public class Populate {
 					ps.clearParameters();
 				}
 				ps.executeBatch();
+				psBusinessWithCategory.executeBatch();
 				
 				//Remove Main Categories from each hashes
 				for(int i = 0 ; i < categories.size() ; i++) {
@@ -315,13 +331,25 @@ public class Populate {
 						}
 					}					
 				}
+				ps.close();
 				
-
+				//Adding SubCategory
+				ps = connection.prepareStatement(
+						"Insert INTO " 
+				+ "SubCategory(mainCategory,subName) " 
+				+ "VALUES (?,?)");
+				
 				for (int i = 0; i < categories.size(); i++) {
-					System.out.println(categories.get(i).mainCategory);
-					System.out.println(categories.get(i).subCategory.toString());
-					System.out.println("-----");
+					ps.setString(1, categories.get(i).mainCategory);
+					for (String subCategory : categories.get(i).subCategory) {
+						ps.setString(2, subCategory);
+						ps.addBatch();
+					}
+					//System.out.println(categories.get(i).mainCategory);
+					//System.out.println(categories.get(i).subCategory.toString());
+					//System.out.println("-----");
 				}
+				ps.executeBatch();
 				
 				//Adding subcategories to tables
 			}
