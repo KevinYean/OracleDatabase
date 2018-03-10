@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -192,6 +193,7 @@ public class Populate {
 					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-DD");
 					java.util.Date javaDate = df.parse(yelpDate);
 					java.sql.Date sqlDate = new java.sql.Date(javaDate.getTime());
+				
 
 					ps.setString(1, reviewID);
 					ps.setString(2, businessID);
@@ -199,6 +201,7 @@ public class Populate {
 					ps.setFloat(4, stars);
 					ps.setFloat(5, sumVotes);
 					ps.setDate(6, sqlDate);
+					
 					ps.addBatch();
 					ps.clearParameters();
 				}
@@ -241,6 +244,47 @@ public class Populate {
 					ps.addBatch();
 					ps.clearParameters();
 				}
+				ps.executeBatch();
+			}
+			
+			// Yelp User JSON File
+			if (path.contains("yelp_checkin")) {
+				System.out.println("Adding all values in YelpCheckin");
+				String[] arr = sb.toString().split("(?=\\{\"checkin_info\")");
+				ps = connection.prepareStatement(
+						"Insert INTO " + "Checkin(businessID,hours,day,checkCount) "
+								+ "VALUES (?,?,?,?)");
+				for (int i = 0; i < arr.length; i++) {
+					// Batch Attempt
+					JSONObject object = new JSONObject(arr[i]);
+					String businessID = object.getString("business_id");
+					
+					JSONObject checkInfo = object.getJSONObject("checkin_info");
+					Iterator<?> keys = checkInfo.keys();
+					String hours;
+					String day;
+					int checkCount;
+					
+					while(keys.hasNext()) {
+						String key = (String)keys.next();
+						String[] splitVal = key.split("-");
+						hours = splitVal[0];
+						day = splitVal[1];
+						checkCount = checkInfo.getInt(key);
+						/*System.out.println(key);
+						System.out.println("Hours" + hours);
+						System.out.println("Day" + day);
+						System.out.println(checkInfo.getInt(key));*/
+						
+						ps.setString(1, businessID);
+						ps.setString(2, hours);
+						ps.setString(3, day);
+						ps.setInt(4, checkCount);
+						ps.addBatch();
+						ps.clearParameters();
+					}
+				}
+				System.out.println(arr.length);
 				ps.executeBatch();
 			}
 

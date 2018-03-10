@@ -1,3 +1,1 @@
-SELECT subName
-FROM SUBCATEGORY 
-WHERE mainCategory = 'Drugstores'
+SELECT * FROM BUSINESS WHERE businessID in (SELECT businessID FROM REVIEWS WHERE reviewsID in (SELECT reviewsID FROM Reviews  WHERE reviewDate > TO_DATE('1994-03-04','yyyy-mm-dd') INTERSECT SELECT reviewsID FROM Reviews  WHERE reviewDate < TO_DATE('2018-03-09','yyyy-mm-dd') INTERSECT SELECT reviewsID FROM Reviews  WHERE stars = '4'  INTERSECT SELECT reviewsID FROM Reviews  WHERE voteCount = '1' )) INTERSECT SELECT * FROM business where businessID in (SELECT businessID FROM  (SELECT sum(checkCount) as totalCheck, businessID FROM(   SELECT * FROM CHECKIN WHERE day >= 0 AND hours >= 0 AND day <= 6 AND hours <= 23) Group by businessID ) WHERE totalCheck > 10000) INTERSECT SELECT * FROM Business WHERE businessID in (SELECT businessID FROM BusinessWithCategory WHERE categoryName = 'Airports' )
